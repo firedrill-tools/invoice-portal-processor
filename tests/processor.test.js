@@ -133,6 +133,7 @@ test("scripted Claude tool-use drives a real browser and saves confirmation capt
     const { outputDir, result } = await runProcessor("Enter DOC-001", {
       baseUrl,
       outputRoot: dir,
+      model: "synthetic-offline",
       client,
     });
     assert.equal(store.read().entries.length, 1);

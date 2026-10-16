@@ -53,6 +53,7 @@ export function validateMessage(response, seenResponses, seenCalls) {
     !text(response.id) ||
     !text(response.model) ||
     seenResponses.has(response.id) ||
+    response.stop_sequence != null ||
     !Array.isArray(response.content) ||
     !response.content.length
   )
@@ -62,6 +63,20 @@ export function validateMessage(response, seenResponses, seenCalls) {
   let final = false;
   for (const block of response.content) {
     if (!record(block)) throw new Error("Invalid native content block");
+    if (block.type === "thinking") {
+      if (
+        typeof block.thinking !== "string" ||
+        block.thinking.length > 64000 ||
+        (block.signature != null && typeof block.signature !== "string")
+      )
+        throw new Error("Invalid native thinking metadata");
+      continue;
+    }
+    if (block.type === "redacted_thinking") {
+      if (typeof block.data !== "string" || block.data.length > 64000)
+        throw new Error("Invalid redacted thinking metadata");
+      continue;
+    }
     if (block.type === "text") {
       if (typeof block.text !== "string" || block.text.length > 64000)
         throw new Error("Invalid native text");

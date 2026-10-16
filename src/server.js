@@ -89,6 +89,9 @@ export function createApp(file) {
             `<a class="back" href="/invoices/${escape(req.params.id)}">← Source document</a><div role="alert" class="warning"><h1>Submission blocked</h1><p>${escape(result.error)}</p></div><p>No portal entry was created.</p>`,
           ),
         );
+    res.set("X-Invoice-Entry-ID", result.entry.id);
+    res.set("X-Invoice-Source-ID", encodeURIComponent(req.params.id));
+    res.set("X-Invoice-Replayed", "false");
     res.redirect(303, `/invoices/${encodeURIComponent(req.params.id)}?saved=1`);
   });
   app.get("/api/state", (_req, res) => res.json(store.read()));
