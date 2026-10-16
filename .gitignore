@@ -3,3 +3,6 @@ workspace.json
 artifacts/
 .env
 .DS_Store
+*.lock.sqlite
+*.lock.sqlite-*
+workspace.json.*.tmp

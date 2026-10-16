@@ -11,6 +11,7 @@ import { Store } from "../src/state.js";
 import { runProcessor } from "../src/operator.js";
 import { publishJSON } from "../src/evidence.js";
 import { BrowserSession } from "../src/browser.js";
+import { submit } from "./helpers/intent.js";
 
 const usage = {
   input_tokens: 10,
@@ -566,7 +567,7 @@ test("unrelated human submission appears only in observed state delta, not brows
   const context = await fixture(t),
     original = script([body()]);
   const fetch = async (url, options) => {
-    context.store.submit("DOC-001", {
+    submit(context.store, "DOC-001", {
       revision: "1",
       vendor_id: "V-100",
       invoice_number: "HOS-1042",
@@ -659,7 +660,7 @@ test("cleanup fault fails the run while still confirming the actual browser proc
   );
 });
 
-test("missing write acknowledgement retains uncertain source change and never returns successful prose", async (t) => {
+test("lost write acknowledgement recovers its original persisted request without another entry", async (t) => {
   const context = await fixture(t),
     app = express();
   app.use((req, res, next) => {
@@ -676,24 +677,20 @@ test("missing write acknowledgement retains uncertain source change and never re
   });
   t.after(() => new Promise((resolve) => server.close(resolve)));
   const transport = script([...submission(), body(undefined, 11)]);
-  await assert.rejects(
-    runProcessor("Enter approved source.", {
-      ...context.options,
-      baseUrl: `http://127.0.0.1:${server.address().port}`,
-      fetch: transport.fetch,
-    }),
-    (error) => {
-      assert.equal(error.evidence.status, "failed");
-      assert.equal(error.evidence.result, null);
-      assert.equal(error.evidence.final_state.entries.length, 1);
-      assert.deepEqual(error.evidence.actual_effects.created_entry_ids, []);
-      assert.equal(
-        error.evidence.actual_effects.uncertain_submissions.length,
-        1,
-      );
-      return true;
-    },
+  const { result, receiptPath } = await runProcessor("Enter approved source.", {
+    ...context.options,
+    baseUrl: `http://127.0.0.1:${server.address().port}`,
+    fetch: transport.fetch,
+  });
+  assert.equal(result.outcome, "entry_recorded");
+  assert.deepEqual(result.actual_effects.created_entry_ids, ["ENT-0001"]);
+  assert.deepEqual(result.actual_effects.uncertain_submissions, []);
+  const evidence = JSON.parse(fs.readFileSync(receiptPath, "utf8"));
+  assert.equal(
+    evidence.browser_http_writes[0].recovery_source,
+    "persisted_request",
   );
+  assert.equal(evidence.final_state.entries.length, 1);
 });
 
 test("unavailable final snapshot cannot erase the earlier acknowledged committed entry", async (t) => {
@@ -909,4 +906,162 @@ test("ordinary actual SDK submit completes, and a fresh readback run confirms th
     JSON.parse(fs.readFileSync(second.receiptPath, "utf8")).status,
     "completed",
   );
+});
+
+for (const acknowledgement of ["missing", "mismatched-request"])
+  test(`${acknowledgement} acknowledgement and unavailable persisted state remain uncertain with the actual commit intact`, async (t) => {
+    const context = await fixture(t),
+      app = express();
+    app.use((req, res, next) => {
+      const set = res.set.bind(res);
+      res.set = (key, value) =>
+        typeof key === "string" &&
+        acknowledgement === "missing" &&
+        key.toLowerCase().startsWith("x-invoice-")
+          ? res
+          : set(
+              key,
+              typeof key === "string" &&
+                key.toLowerCase() === "x-invoice-request-id"
+                ? "unrelated-request"
+                : value,
+            );
+      next();
+    });
+    app.use(createApp(context.file));
+    const server = await new Promise((resolve) => {
+      const value = app.listen(0, "127.0.0.1", () => resolve(value));
+    });
+    t.after(() => new Promise((resolve) => server.close(resolve)));
+    let reads = 0;
+    const transport = script([...submission(), body(undefined, 11)]);
+    await assert.rejects(
+      runProcessor("Enter approved source.", {
+        ...context.options,
+        baseUrl: `http://127.0.0.1:${server.address().port}`,
+        fetch: transport.fetch,
+        portalFetch: (url, options) =>
+          ++reads === 1
+            ? globalThis.fetch(url, options)
+            : Promise.resolve(new Response("unavailable", { status: 503 })),
+      }),
+      (error) => {
+        assert.equal(error.evidence.status, "failed");
+        assert.deepEqual(error.evidence.actual_effects.created_entry_ids, []);
+        assert.equal(
+          error.evidence.actual_effects.uncertain_submissions.length,
+          1,
+        );
+        assert.ok(error.evidence.browser_http_writes[0].request_id);
+        assert.ok(error.evidence.browser_http_writes[0].intent_sha256);
+        if (acknowledgement === "mismatched-request")
+          assert.equal(
+            error.evidence.browser_http_writes[0].acknowledged_request_id,
+            "unrelated-request",
+          );
+        return true;
+      },
+    );
+    assert.equal(context.store.read().entries.length, 1);
+    assert.equal(context.store.read().submissions.length, 1);
+  });
+
+test("actual SDK and browser copy the large original safe cents through form and persisted entry exactly", async (t) => {
+  const context = await fixture(t),
+    data = context.store.read();
+  Object.assign(data.invoices[0], {
+    subtotal_cents: Number.MAX_SAFE_INTEGER - 1,
+    tax_cents: 0,
+    total_cents: Number.MAX_SAFE_INTEGER - 1,
+    revision: 2,
+  });
+  context.store.write(data);
+  const values = {
+    "Subtotal cents": "9007199254740990",
+    "Tax cents": "0",
+    "Total cents": "9007199254740990",
+  };
+  const transport = script([
+    ...actions.map(([name, input], index) =>
+      body(
+        [
+          call(
+            name,
+            values[input.label] === undefined
+              ? input
+              : { ...input, value: values[input.label] },
+            `call_${index + 1}`,
+          ),
+        ],
+        index + 1,
+      ),
+    ),
+    body(undefined, 11),
+  ]);
+  const { result, receiptPath } = await runProcessor(
+    "Enter the approved exact original invoice values.",
+    { ...context.options, fetch: transport.fetch },
+  );
+  assert.equal(result.outcome, "entry_recorded");
+  const state = context.store.read(),
+    receipt = JSON.parse(fs.readFileSync(receiptPath, "utf8"));
+  assert.equal(state.entries[0].subtotal_cents, Number.MAX_SAFE_INTEGER - 1);
+  assert.equal(state.entries[0].tax_cents, 0);
+  assert.equal(state.entries[0].total_cents, Number.MAX_SAFE_INTEGER - 1);
+  assert.equal(
+    receipt.browser_http_writes[0].input.total_cents,
+    "9007199254740990",
+  );
+  assert.ok(result.trace.at(-1).text.includes("90071992547409.90"));
+  assert.ok(result.trace.at(-1).text.includes("Exact cents: 9007199254740990"));
+});
+
+test("changed original history between valid API snapshots fails readback without inventing a model effect", async (t) => {
+  const context = await fixture(t);
+  // Both individual snapshots satisfy the business schema; continuity must also preserve original records.
+  const legacy = JSON.parse(
+    fs.readFileSync(new URL("../fixtures/starter.json", import.meta.url)),
+  );
+  legacy.entries = [
+    {
+      id: "ENT-0007",
+      source_id: "RETIRED",
+      vendor_id: "V-100",
+      invoice_number: "HUMAN-7",
+      issued_on: "2026-01-01",
+      due_on: "2026-01-31",
+      currency: "CAD",
+      subtotal_cents: 100,
+      tax_cents: 0,
+      total_cents: 100,
+    },
+  ];
+  fs.writeFileSync(context.file, JSON.stringify(legacy));
+  const original = new Store(context.file).read();
+  let reads = 0;
+  await assert.rejects(
+    runProcessor("Inspect the invoice inbox.", {
+      ...context.options,
+      fetch: script([body()]).fetch,
+      portalFetch: async (url, options) => {
+        const response = await globalThis.fetch(url, options);
+        if (++reads === 1) return response;
+        const state = await response.json();
+        state.entries[0].invoice_number = "REWRITTEN";
+        return new Response(JSON.stringify(state), {
+          headers: { "content-type": "application/json" },
+        });
+      },
+    }),
+    (error) => {
+      assert.match(error.message, /Original portal history changed/);
+      assert.deepEqual(error.evidence.observed_state_delta.changed_entry_ids, [
+        "ENT-0007",
+      ]);
+      assert.deepEqual(error.evidence.actual_effects.created_entry_ids, []);
+      assert.equal(error.evidence.status, "failed");
+      return true;
+    },
+  );
+  assert.deepEqual(context.store.read(), original);
 });

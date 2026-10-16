@@ -1,6 +1,7 @@
 import { createHash } from "node:crypto";
 import { tools, validateMessage } from "./contracts.js";
 import { errorInfo, untilAbort } from "./lifecycle.js";
+import { validateState } from "./state-contracts.js";
 export const LIMIT = 1048576;
 export const now = () => new Date().toISOString();
 export const hash = (value) => createHash("sha256").update(value).digest("hex");
@@ -287,6 +288,7 @@ export async function sourceSnapshot(
       )
     )
       throw new Error("Portal source snapshot is invalid or unavailable");
+    validateState(record.body);
     return { state: record.body, sha256: hash(JSON.stringify(record.body)) };
   } finally {
     clearTimeout(timer);

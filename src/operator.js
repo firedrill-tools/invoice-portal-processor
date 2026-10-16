@@ -3,6 +3,7 @@ import { fileURLToPath } from "node:url";
 import Anthropic from "@anthropic-ai/sdk";
 import { BrowserSession } from "./browser.js";
 import { tools, validateMessage } from "./contracts.js";
+import { canonical, entryNumber } from "./state-contracts.js";
 import {
   NativeEvidence,
   aggregateUsage,
@@ -29,18 +30,47 @@ function actualEffects(initial, final, writes) {
     (initial?.entries ?? []).map((entry) => [entry.id, entry]),
   );
   const created = new Set(),
+    confirmed = new Set(),
     uncertain = [];
+  const sameInstance =
+    initial && final && initial.instance_id === final.instance_id;
   for (const write of writes) {
     if (write.dispatch_attempted === false) continue;
+    const persisted = sameInstance
+      ? final.submissions.find(
+          (item) =>
+            item.request_id === write.request_id &&
+            item.intent_sha256 === write.intent_sha256,
+        )
+      : null;
+    if (persisted) {
+      write.recovery_source = "persisted_request";
+      write.recovered_entry_id = persisted.entry_id;
+      write.recovered_error = persisted.error;
+      if (persisted.status === "submitted") {
+        confirmed.add(persisted.entry_id);
+        if (
+          persisted.actor_run_id === write.run_id &&
+          write.run_id &&
+          write.replayed !== true &&
+          !original.has(persisted.entry_id)
+        )
+          created.add(persisted.entry_id);
+      }
+      continue;
+    }
     if (write.http_status === 303) {
       const valid =
-        typeof write.entry_id === "string" &&
-        /^ENT-[0-9]{4,16}$/.test(write.entry_id) &&
+        entryNumber(write.entry_id) !== null &&
+        write.acknowledged_request_id === write.request_id &&
         write.acknowledged_source_id === write.source_id &&
         write.replayed !== null;
       if (!valid) uncertain.push(write);
-      else if (!write.replayed && !original.has(write.entry_id))
-        created.add(write.entry_id);
+      else {
+        confirmed.add(write.entry_id);
+        if (!write.replayed && !original.has(write.entry_id))
+          created.add(write.entry_id);
+      }
     } else if (write.http_status === null || write.http_status >= 500)
       uncertain.push(write);
   }
@@ -67,6 +97,7 @@ function actualEffects(initial, final, writes) {
       : null;
   return {
     observed_state_delta: delta,
+    confirmed_submission_entry_ids: [...confirmed],
     actual_effects: {
       created_entry_ids: [...created],
       uncertain_submissions: uncertain,
@@ -185,6 +216,7 @@ export async function runProcessor(task, options = {}) {
       signal: owner.signal,
       guard,
       browserType: options.browserType,
+      runId: receipt.data.run_id,
       onEvidence: async () => {
         syncBrowser();
         await receipt.save();
@@ -339,6 +371,29 @@ export async function runProcessor(task, options = {}) {
           );
           receipt.data.final_state = final.state;
           receipt.data.final_state_sha256 = final.sha256;
+          const initial = receipt.data.initial_state;
+          if (initial.instance_id === final.state.instance_id) {
+            const changed =
+              final.state.revision < initial.revision ||
+              initial.entries.some(
+                (entry) =>
+                  canonical(
+                    final.state.entries.find((row) => row.id === entry.id),
+                  ) !== canonical(entry),
+              ) ||
+              ["audit", "submissions", "legacy_entry_ids"].some(
+                (key) =>
+                  canonical(final.state[key].slice(0, initial[key].length)) !==
+                  canonical(initial[key]),
+              ) ||
+              initial.legacy_audit_count !== final.state.legacy_audit_count ||
+              initial.legacy_entry_ids.length !==
+                final.state.legacy_entry_ids.length;
+            if (changed)
+              throw new Error(
+                "Original portal history changed; inspect the original state and request before retrying",
+              );
+          }
         } catch (error) {
           receipt.data.final_snapshot_error = errorInfo(error);
           failure ??= error;
@@ -352,6 +407,18 @@ export async function runProcessor(task, options = {}) {
           browser?.httpWrites ?? [],
         ),
       );
+      syncBrowser();
+      if (
+        receipt.data.initial_state &&
+        receipt.data.final_state &&
+        receipt.data.initial_state.instance_id !==
+          receipt.data.final_state.instance_id
+      )
+        failure ??= new Error(
+          "Portal source instance changed; inspect the original request and state before retrying",
+        );
+      if (browser?.httpWrites.some((write) => write.recovered_error))
+        failure ??= new Error("The original portal request was rejected");
       if (receipt.data.actual_effects.uncertain_submissions.length)
         failure ??= new Error(
           "Portal submission acknowledgement is uncertain; inspect the original receipt/state before retrying",
@@ -359,9 +426,13 @@ export async function runProcessor(task, options = {}) {
       if (result) {
         result.outcome = receipt.data.actual_effects.created_entry_ids.length
           ? "entry_recorded"
-          : "no_new_entry";
+          : receipt.data.confirmed_submission_entry_ids.length
+            ? "entry_confirmed"
+            : "no_new_entry";
         Object.assign(result, {
           actual_effects: receipt.data.actual_effects,
+          confirmed_submission_entry_ids:
+            receipt.data.confirmed_submission_entry_ids,
           observed_state_delta: receipt.data.observed_state_delta,
         });
         if (!failure)

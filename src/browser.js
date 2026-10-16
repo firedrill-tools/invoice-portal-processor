@@ -3,6 +3,7 @@ import { chromium } from "playwright";
 import { portalEndpoint, hash, now } from "./native.js";
 import { publishBinary } from "./evidence.js";
 import { errorInfo, untilAbort, within } from "./lifecycle.js";
+import { parseSubmission } from "./state-contracts.js";
 
 const closeLate = (resource) => {
   void within(resource.close(), 5000, "Late browser cleanup")
@@ -32,6 +33,7 @@ export class BrowserSession {
       guard = () => {},
       onEvidence = async () => {},
       browserType = chromium,
+      runId = null,
     } = {},
   ) {
     this.baseUrl = portalEndpoint(baseUrl);
@@ -40,6 +42,7 @@ export class BrowserSession {
     this.outerGuard = guard;
     this.onEvidence = onEvidence;
     this.browserType = browserType;
+    this.runId = runId;
     this.lifecycle = {
       startup_started: true,
       startup_completed: false,
@@ -164,7 +167,18 @@ export class BrowserSession {
         const body = request.postData();
         if (typeof body !== "string" || Buffer.byteLength(body) > 16384)
           throw new Error("Portal form exceeds its bounded intent");
+        const parameters = new URLSearchParams(body);
+        if (new Set(parameters.keys()).size !== [...parameters.keys()].length)
+          throw new Error("Duplicate portal form fields");
+        const parsed = parseSubmission(
+          this.writeGrant.source_id,
+          Object.fromEntries(parameters),
+        );
         const record = {
+          request_id: parsed.input.request_id,
+          intent_sha256: parsed.intent_sha256,
+          input: parsed.input,
+          run_id: this.runId,
           status: "prepared",
           dispatch_attempted: false,
           prepared_at: now(),
@@ -182,7 +196,13 @@ export class BrowserSession {
       }
       const record = this.requests.get(request);
       if (record) record.dispatch_attempted = true;
-      await route.continue();
+      await route.continue(
+        request.method() === "POST" && this.runId
+          ? {
+              headers: { ...request.headers(), "x-invoice-run-id": this.runId },
+            }
+          : undefined,
+      );
     } catch (error) {
       this.failure ??= error;
       const record = this.requests.get(request);
@@ -204,6 +224,7 @@ export class BrowserSession {
     const headers = await response.allHeaders();
     record.location = headers.location ?? null;
     record.entry_id = headers["x-invoice-entry-id"] ?? null;
+    record.acknowledged_request_id = headers["x-invoice-request-id"] ?? null;
     try {
       record.acknowledged_source_id = headers["x-invoice-source-id"]
         ? decodeURIComponent(headers["x-invoice-source-id"])

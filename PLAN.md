@@ -21,12 +21,20 @@ Private atomic flushed receipts/captures record prepared work before dispatch an
 
 Fifty-seven checks include real native ordinary submission/readback, every failure boundary above, original scripted ordinary browser flow and actual truncated-submit prevention. Verify exact-head Linux CI/catalog for this checkpoint. Strict source/intents/history/data/distribution remain below; no live model proof.
 
+## Completed source/history/concurrency checkpoint
+
+Reproduced approved impossible-date and unsupported-currency commits, a misleading pending-source heading and lost cents at MAX_SAFE_INTEGER-1. Complete versioned source/history contracts now keep readable business conflicts, refuse structural/committed corruption without repair and render BigInt decimal plus raw cents. Actual Gregorian dates, supported CAD/USD/EUR/GBP two-minor-unit currencies, exact safe integer values and canonical vendor/invoice identity are authoritative.
+
+Reviewed form tokens bind workspace instance, full source/approval/revision and vendor. Stable original request IDs bind every exact form field; exact success/rejection replay returns immutable original facts after source edits, without another event. Changed intent fails. Entry/source/vendor/request/time hashes and one ordered audit event are validated, original legacy IDs/order/facts survive with unknown provenance, and source edits cannot overwrite history.
+
+Private staged JSON publication holds a persistent Node24 SQLite mutex through coherent read/validation/flush/hash/inode check/rename/directory sync. The sidecar is solely a cooperating-process mutex and must never be unlinked. Cancellation before publication leaves no partial entry; uncertain publication and process crash after commit recover the original request. Same/competing invoice processes, busy lock, inode replacement and crashes are qualified. No noncooperating external editor/distributed transaction guarantee.
+
+Actual browser submissions now retain exact request identity/digest/run label. Final strict API state recovers a lost acknowledgement from the original persisted request; absent/mismatched acknowledgement plus unavailable final state remains uncertain. Original history continuity is checked across snapshots; unrelated human deltas stay separate. Exact large safe cents pass actual SDK/Chromium form/entry. See SOURCE.md and COMPATIBILITY.md for scope. **125 checks** qualify this checkpoint; exact-head CI/catalog next. Controlled offline proof only.
+
 ## Independent work next
 
-1. Strict complete source/vendor/invoice/entry/audit schemas that keep readable business conflicts (missing field, mismatched total, pending approval), exact dates/currency/minor units and canonical duplicate identity. Source panel headings must reflect actual approval; its current fixed “Approved source” heading also appears for pending documents. Bind stable submission request IDs to exact reviewed source/approval/vendor/values and explicit original provenance. Exact original recovery returns immutable entry without another effect; changed intent fails. Preserve original human entries/IDs/times and unknown legacy provenance without inventing prior runs.
-2. Private unique atomic JSON publication, precommit cancellation/source binding and real cooperating writer concurrency. Qualify a persistent Node24 SQLite mutex sidecar solely for cross-process JSON transactions: never unlink/replace its inode, kernel releases locks on crash; hold it through read/validation/publication and preserve uncertain JSON commit for original-request recovery. Current JSON store remains single-process qualified; source-read/approval/form fingerprints remain to be completed.
-3. Rich deterministic hash-bound starter/busy/ambiguous/boundary cases with vendors/documents/prior human entries/noncontiguous IDs and exact state relationships. Human task/focus excluded from implicit prompts; no provider answer matching. Exclusive private key-free list/init/show CLI and complete locked source archive verified outside checkout with native/browser/negative/recovery paths.
-4. Verify all final gates/exact-head CI/catalog, then #27/#31/#36/#40 and Wave3.
+1. Rich deterministic hash-bound starter/busy/ambiguous/boundary cases with vendors/documents/prior human entries/noncontiguous IDs and exact state relationships. Human task/focus excluded from implicit prompts; no provider answer matching. Exclusive private key-free list/init/show CLI and complete locked source archive verified outside checkout with native/browser/negative/recovery paths.
+2. Verify all final gates/exact-head CI/catalog, then #27/#31/#36/#40 and Wave3.
 
 ## Parked external gates
 

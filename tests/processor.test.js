@@ -9,6 +9,7 @@ import { startServer } from "../src/server.js";
 import { runProcessor } from "../src/operator.js";
 import Anthropic from "@anthropic-ai/sdk";
 import { validateMessage } from "../src/contracts.js";
+import { submit, intent } from "./helpers/intent.js";
 
 const root = path.dirname(path.dirname(fileURLToPath(import.meta.url)));
 const fixture = path.join(root, "fixtures/starter.json");
@@ -33,10 +34,10 @@ const setup = (t) => {
 
 test("store accepts exact approved invoice once and rejects duplicate delivery", (t) => {
   const { store } = setup(t);
-  const first = store.submit("DOC-001", valid);
+  const first = submit(store, "DOC-001", valid);
   assert.equal(first.entry.id, "ENT-0001");
-  assert.equal(store.submit("DOC-001", valid).error, "already_submitted");
-  assert.equal(store.submit("DOC-004", valid).error, "duplicate_invoice");
+  assert.equal(submit(store, "DOC-001", valid).error, "already_submitted");
+  assert.equal(submit(store, "DOC-004", valid).error, "duplicate_invoice");
   assert.equal(store.read().entries.length, 1);
   assert.deepEqual(
     store.read().audit.map((item) => item.action),
@@ -47,7 +48,7 @@ test("store accepts exact approved invoice once and rejects duplicate delivery",
 test("store rejects missing fields, mismatched source totals, pending approval, and tampering", (t) => {
   const { store } = setup(t);
   assert.equal(
-    store.submit("DOC-002", {
+    submit(store, "DOC-002", {
       ...valid,
       vendor_id: "V-200",
       invoice_number: "NLS-218",
@@ -55,11 +56,11 @@ test("store rejects missing fields, mismatched source totals, pending approval, 
     "source_missing_field",
   );
   assert.equal(
-    store.submit("DOC-003", { ...valid, invoice_number: "HOS-1043" }).error,
+    submit(store, "DOC-003", { ...valid, invoice_number: "HOS-1043" }).error,
     "source_total_mismatch",
   );
   assert.equal(
-    store.submit("DOC-005", {
+    submit(store, "DOC-005", {
       ...valid,
       vendor_id: "V-200",
       invoice_number: "NLS-219",
@@ -67,16 +68,16 @@ test("store rejects missing fields, mismatched source totals, pending approval, 
     "approval_required",
   );
   assert.equal(
-    store.submit("DOC-001", { ...valid, total_cents: "13561" }).error,
+    submit(store, "DOC-001", { ...valid, total_cents: "13561" }).error,
     "amount_mismatch",
   );
   assert.equal(
-    store.submit("DOC-001", { ...valid, due_on: "2026-11-30" }).error,
+    submit(store, "DOC-001", { ...valid, due_on: "2026-11-30" }).error,
     "field_mismatch",
   );
-  assert.equal(
-    store.submit("DOC-001", { ...valid, revision: "0" }).error,
-    "stale_revision",
+  assert.throws(
+    () => submit(store, "DOC-001", { ...valid, revision: "0" }),
+    (error) => error.code === "invalid_request",
   );
   assert.equal(store.read().entries.length, 0);
 });
@@ -152,7 +153,7 @@ test("scripted Claude tool-use drives a real browser and saves confirmation capt
     const duplicate = await fetch(`${baseUrl}/invoices/DOC-004`, {
       method: "POST",
       headers: { "content-type": "application/x-www-form-urlencoded" },
-      body: new URLSearchParams(valid),
+      body: new URLSearchParams(intent(store, "DOC-004", valid)),
     });
     assert.equal(duplicate.status, 409);
     assert.equal(store.read().entries.length, 1);
@@ -172,7 +173,7 @@ test("saved query cannot claim a pending or unsubmitted source was entered", asy
         !page.includes("Invoice submitted. Portal entry confirmed below."),
       );
     }
-    store.submit("DOC-001", valid);
+    submit(store, "DOC-001", valid);
     const page = await (await fetch(`${url}/invoices/DOC-001?saved=1`)).text();
     assert.ok(page.includes("Portal entry ENT-0001"));
     assert.ok(
@@ -199,8 +200,15 @@ test("noncontiguous original entry identities cannot collide with a new entry", 
     total_cents: 100,
   };
   data.entries.push(prior);
-  store.write(data);
-  assert.equal(store.submit("DOC-001", valid).entry.id, "ENT-0003");
+  const legacy = {
+    vendors: data.vendors,
+    invoices: data.invoices,
+    entries: data.entries,
+    audit: data.audit,
+  };
+  fs.writeFileSync(store.file, JSON.stringify(legacy));
+  new Store(store.file);
+  assert.equal(submit(store, "DOC-001", valid).entry.id, "ENT-0003");
   assert.deepEqual(store.read().entries[0], prior);
 });
 
