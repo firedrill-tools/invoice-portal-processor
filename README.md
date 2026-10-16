@@ -9,15 +9,16 @@ Requires **Node 24+**, npm, and Chromium for Playwright. Node's built-in SQLite 
 ```sh
 npm ci
 npx playwright install chromium
-mkdir -m 700 local-run
-node --input-type=module -e 'import fs from "node:fs"; fs.copyFileSync("fixtures/starter.json", "local-run/workspace.json", fs.constants.COPYFILE_EXCL)'
-INVOICE_WORKSPACE_FILE=local-run/workspace.json npm run portal
+npm run cases -- list
+mkdir -m 700 local-cases
+npm run cases -- init starter local-cases/starter
+INVOICE_WORKSPACE_FILE=local-cases/starter/workspace.json npm run portal
 ```
 
 In another terminal, set `ANTHROPIC_API_KEY` and `ANTHROPIC_MODEL` to your account's enabled model, then run:
 
 ```sh
-INVOICE_OUTPUT_ROOT=local-run/artifacts npm run operate -- "Enter approved invoice DOC-001 into the portal, then verify the saved entry"
+INVOICE_OUTPUT_ROOT=local-cases/starter/artifacts npm run operate -- "Enter approved invoice DOC-001 into the portal, then verify the saved entry"
 ```
 
 Neither model nor key has a scripted fallback. The pinned SDK uses an explicit validated endpoint, zero retries and bounded execution. Original HTTP completion is checked before SDK parsing and browser actions. Browser HTTP resources and forms stay on the configured exact loopback origin; fonts use local fallbacks. Tests control HTTP responses through the actual SDK and do not call a paid provider.
@@ -25,6 +26,10 @@ Neither model nor key has a scripted fallback. The pinned SDK uses an explicit v
 `INVOICE_PORTAL_URL`, `INVOICE_WORKSPACE_FILE`, `INVOICE_OUTPUT_ROOT`, `ANTHROPIC_BASE_URL` and `PORT` are configurable; see [.env.example](.env.example). The portal URL must be a loopback HTTP root without credentials/query/fragment. The provider requires HTTPS or controlled loopback HTTP.
 
 Each run creates a fresh private `<output-root>/<run-id>/trace.json` and viewport PNGs. Receipts bind task/instruction/source hashes, complete initial/final portal facts, original provider requests/decoded responses/usage/errors, separately labeled SDK reports, prepared browser form intents, original-request recovery and resource cleanup. Missing/cache/zero counters remain distinct; cost stays unknown. Keep these files private: they contain source, form and conversation data.
+
+## Cases
+
+Twelve deterministic hash-bound cases cover starter/busy/ambiguous/boundary profiles. Busy contains eight vendors, 36 documents and twelve original human imports with noncontiguous IDs. Each private copy has a fresh workspace identity. Human tasks/focus stay outside implicit model state. Use `npm run cases -- init busy local-cases/busy` and `npm run cases -- show local-cases/busy`; initialization never overwrites a destination or mutex. [DATA.md](DATA.md) lists every case, CLI contract and source archive command.
 
 ## Source authority and recovery
 
@@ -46,9 +51,9 @@ A failed acknowledgement may follow a committed entry. The operator retains the 
 
 ## Verification and limits
 
-`npm test` qualifies **125 offline checks**, including actual Anthropic SDK/public controlled HTTP → real Chromium → portal flows, exact large-cent entry, strict source/history corruption refusal, original success/rejection recovery, uncertain commit recovery, cross-process same/competing submissions, mutex contention/replacement and process crashes before/after publication. Native completion, all-step raw usage/errors, budgets, stalled/late responses, browser startup/closure, private recording faults and partial effects remain covered. Original injected-client tests are labeled separately.
+`npm test` qualifies **153 offline checks**, including actual Anthropic SDK/public controlled HTTP → real Chromium → portal flows, exact large-cent entry, strict source/history corruption refusal, original success/rejection recovery, uncertain commit recovery, cross-process same/competing submissions, mutex contention/replacement and process crashes before/after publication. Native completion, all-step raw usage/errors, budgets, stalled/late responses, browser startup/closure, private recording faults and partial effects remain covered. Original injected-client tests are labeled separately. Normal operator CLI tests use the actual SDK against an owned loopback HTTP provider, including ordinary busy entry, provider failure and SIGINT/SIGTERM/SIGHUP. Playwright signal handling is disabled so the CLI owner can abort, close its real process and publish final evidence; cancellation after commit preserves ENT-0080 and all twelve prior human records.
 
-[COMPATIBILITY.md](COMPATIBILITY.md) defines ownership, bounds and evidence scope. Rich deterministic hash-bound datasets, exclusive private case CLI and a fresh locked source archive remain active in [PLAN.md](PLAN.md). No live Claude judgment, billing, Firedrill integration or financial transfer is claimed. Live model/new Firedrill/publication/license gates remain parked.
+[COMPATIBILITY.md](COMPATIBILITY.md) defines ownership, bounds and evidence scope. `npm run check:distribution` qualifies a complete deterministic source archive outside the checkout with a fresh locked install, all twelve private cases and the full test suite. See [DATA.md](DATA.md) and [PLAN.md](PLAN.md). No live Claude judgment, billing, Firedrill integration or financial transfer is claimed. Live model/new Firedrill/publication/license gates remain parked.
 
 Dependencies are pinned in `package-lock.json`. This repository is private and intentionally has no license pending the portfolio decision.
 

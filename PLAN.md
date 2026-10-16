@@ -31,10 +31,18 @@ Private staged JSON publication holds a persistent Node24 SQLite mutex through c
 
 Actual browser submissions now retain exact request identity/digest/run label. Final strict API state recovers a lost acknowledgement from the original persisted request; absent/mismatched acknowledgement plus unavailable final state remains uncertain. Original history continuity is checked across snapshots; unrelated human deltas stay separate. Exact large safe cents pass actual SDK/Chromium form/entry. See SOURCE.md and COMPATIBILITY.md for scope. **125 checks** qualify this checkpoint; exact-head CI/catalog next. Controlled offline proof only.
 
+## Completed data/CLI/distribution checkpoint
+
+Twelve deterministic ledgerline-invoice-workspace1.0.0 cases span four profiles. Busy contains eight vendors/36 documents/twelve coherent original human imports and noncontiguous IDs; ambiguous/duplicate/revoked existing/missing/total/approval/date/currency/large-cent/empty cases remain distinct. Whole manifest/envelope identity/hash/schema validation precedes list/init. New exclusive private case directories receive fresh workspace identity with preserved human facts and separate initial/source digest metadata. Show validates provenance/current source without migration/repair. Human tasks/focus never enter the source API or implicit model context. DATA.md documents every case and key-free strict CLI.
+
+Normal operator CLI now has actual SDK/loopback HTTP/real Chromium proofs for busy entry,503 after commit and SIGINT/SIGTERM/SIGHUP. SIGINT reproduced a library process-exit handler bypassing final evidence; public Playwright signal options are disabled so the CLI owner can abort/drain/close/record. SIGTERM after commit preserves ENT-0080 and all original imports, while earlier cancellation leaves no entry. CLI help/key-negative and actual portal ephemeral startup are qualified.
+
+**153 offline checks pass**. The complete deterministic source archive is extracted outside checkout, hash verified, freshly npm-ci installed with local SDK resolution, all twelve private CLI initializations/collision/key-negative paths and full suite rerun. CI repeats full source and fresh-distribution checks and uploads artifact proof. Verify exact-head CI/catalog before advancing. No live provider or Firedrill proof is implied.
+
 ## Independent work next
 
-1. Rich deterministic hash-bound starter/busy/ambiguous/boundary cases with vendors/documents/prior human entries/noncontiguous IDs and exact state relationships. Human task/focus excluded from implicit prompts; no provider answer matching. Exclusive private key-free list/init/show CLI and complete locked source archive verified outside checkout with native/browser/negative/recovery paths.
-2. Verify all final gates/exact-head CI/catalog, then #27/#31/#36/#40 and Wave3.
+1. Verify final source/distribution/exact-head CI/catalog gates for this checkpoint.
+2. Continue #27/#31/#36/#40 and Wave3 requirement audits. Independent invoice work is complete once these final gates pass; live/user-dependent gates remain parked below.
 
 ## Parked external gates
 

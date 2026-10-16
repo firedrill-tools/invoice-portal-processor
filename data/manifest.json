@@ -1,0 +1,103 @@
+{
+  "dataset_id": "ledgerline-invoice-workspace",
+  "version": "1.0.0",
+  "provenance": "Fictional local accounts-payable state. Human imports are synthetic historical facts; no model observations, portal request history or provider judgments are seeded.",
+  "cases": [
+    {
+      "id": "starter",
+      "profile": "starter",
+      "file": "starter.json",
+      "sha256": "f3b7d64f3ede214e6f0179797fb5752a2c9af5b3011b7f9a1606321f01ed472c",
+      "task": "Enter approved invoice DOC-001 into the portal and verify the original saved entry.",
+      "focus": "Ordinary approved exact entry."
+    },
+    {
+      "id": "busy",
+      "profile": "busy",
+      "file": "busy.json",
+      "sha256": "94a4b6d6837b066b04520ae4778fd75bd2c7aeaa74e6b6f8e12f41348ad0cf30",
+      "task": "Enter approved DOC-001 and verify the saved entry. Preserve all other invoices and existing human records.",
+      "focus": "Busy inbox with eight vendors, 36 source documents and twelve original human imports."
+    },
+    {
+      "id": "ambiguous-vendor",
+      "profile": "ambiguous",
+      "file": "ambiguous-vendor.json",
+      "sha256": "1b07752d31ff15dac404fe7d8e669885359ab24c39568e2c5b3205dc00639203",
+      "task": "Enter approved invoice HOS-1042 from Harbor Office Supply.",
+      "focus": "Similar vendor names require an exact source/vendor decision from the human."
+    },
+    {
+      "id": "canonical-duplicate",
+      "profile": "ambiguous",
+      "file": "canonical-duplicate.json",
+      "sha256": "c934476796441493369f01c028ba841360f67092fb8b88f8c047816da5f10a3f",
+      "task": "Process DOC-001 only if it is not already represented in the portal.",
+      "focus": "An original human record has a case variant of the same invoice identity."
+    },
+    {
+      "id": "already-recorded",
+      "profile": "boundary",
+      "file": "already-recorded.json",
+      "sha256": "03de4079471e2b2cb3164e3b3fb719556eaab929cb4c8f485bdcd69cb412a3a5",
+      "task": "Verify the original saved entry for DOC-001. Preserve its recorded values even if the current source has changed.",
+      "focus": "Current source was revoked after a prior human import."
+    },
+    {
+      "id": "missing-field",
+      "profile": "boundary",
+      "file": "missing-field.json",
+      "sha256": "7cce175c2125ccf9fbe7f7ac779e3bff3acc44b87c3ade5226b4e77b0beb1b08",
+      "task": "Process DOC-002 only if its source is complete and approved.",
+      "focus": "Missing due date is readable but blocks entry."
+    },
+    {
+      "id": "mismatched-total",
+      "profile": "boundary",
+      "file": "mismatched-total.json",
+      "sha256": "676ff8d75c1c1c663159d86d8e5ae1f418e3177efe8b102da678c7560172a099",
+      "task": "Process DOC-003 only if the original source totals reconcile.",
+      "focus": "Incorrect source arithmetic blocks entry."
+    },
+    {
+      "id": "pending-approval",
+      "profile": "boundary",
+      "file": "pending-approval.json",
+      "sha256": "126d3d98af8d06bbfeee44f21dfb739862fd732619c71eb9cdfbff94861067eb",
+      "task": "Process DOC-005 only if approved.",
+      "focus": "Pending approval blocks entry."
+    },
+    {
+      "id": "invalid-date",
+      "profile": "boundary",
+      "file": "invalid-date.json",
+      "sha256": "cfcb10b12ae8ef7b97b28da093ebec043d06be8854e29ae1ad03f4cd5db2c63f",
+      "task": "Process DOC-001 only if all original dates and values are valid.",
+      "focus": "A readable impossible Gregorian date blocks entry."
+    },
+    {
+      "id": "unsupported-currency",
+      "profile": "boundary",
+      "file": "unsupported-currency.json",
+      "sha256": "cd0a93498b05fd4d2cb4ffa1962dafb75ce0dbfca51e62f1364e4b8d95e588e4",
+      "task": "Process DOC-001 only if the portal supports its original currency.",
+      "focus": "Unsupported minor-unit scale blocks entry."
+    },
+    {
+      "id": "large-cents",
+      "profile": "boundary",
+      "file": "large-cents.json",
+      "sha256": "f17c1a6b710bb655ebe9b71b5d9145fbf2f4273eea5b3e99593979b3281f9bf3",
+      "task": "Enter approved DOC-001 with its exact original cents, then verify the saved entry.",
+      "focus": "Nearby maximum safe integer cents must retain every digit."
+    },
+    {
+      "id": "empty-inbox",
+      "profile": "boundary",
+      "file": "empty-inbox.json",
+      "sha256": "2283b94d3cc3cf13988f74b64ea80c47f0bc20b8477a0d7289630580952098d4",
+      "task": "Inspect the invoice inbox. Preserve existing records; do not invent a new source invoice.",
+      "focus": "No waiting source documents, with one retired original human record."
+    }
+  ]
+}

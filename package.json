@@ -1,12 +1,15 @@
 {
   "name": "invoice-portal-processor",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "private": true,
   "type": "module",
   "scripts": {
     "portal": "node src/server.js",
     "operate": "node src/operator.js",
-    "test": "node --test tests/*.test.js"
+    "test": "node --test tests/*.test.js",
+    "cases": "node src/datasets.js",
+    "data:generate": "node scripts/generate-data.js",
+    "check:distribution": "python3 scripts/check-distribution.py"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "0.134.0",

@@ -6,3 +6,8 @@ artifacts/
 *.lock.sqlite
 *.lock.sqlite-*
 workspace.json.*.tmp
+dist/
+local-run/
+local-cases/
+__pycache__/
+*.pyc

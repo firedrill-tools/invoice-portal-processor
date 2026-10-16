@@ -1,0 +1,53 @@
+{
+  "dataset_id": "ledgerline-invoice-workspace",
+  "version": "1.0.0",
+  "case_id": "empty-inbox",
+  "profile": "boundary",
+  "state": {
+    "schema_version": 1,
+    "instance_id": "93fdb6f7-8002-42fb-afb9-0e8be9bc1324",
+    "revision": 1,
+    "vendors": [],
+    "invoices": [],
+    "entries": [
+      {
+        "id": "ENT-0019",
+        "source_id": "RETIRED-HOS",
+        "vendor_id": "V-100",
+        "invoice_number": "HOS-1042",
+        "issued_on": "2026-10-01",
+        "due_on": "2026-10-31",
+        "currency": "CAD",
+        "subtotal_cents": 12000,
+        "tax_cents": 1560,
+        "total_cents": 13560,
+        "provenance": {
+          "kind": "human_import",
+          "source_snapshot": {
+            "id": "RETIRED-HOS",
+            "vendor_id": "V-100",
+            "invoice_number": "HOS-1042",
+            "issued_on": "2026-10-01",
+            "due_on": "2026-10-31",
+            "currency": "CAD",
+            "subtotal_cents": 12000,
+            "tax_cents": 1560,
+            "total_cents": 13560,
+            "approval": "approved",
+            "revision": 1
+          },
+          "vendor_snapshot": {
+            "id": "V-100",
+            "name": "Harbor Office Supply"
+          },
+          "at": "2026-10-10T12:00:00.000Z",
+          "actor_label": "Fictional AP import"
+        }
+      }
+    ],
+    "audit": [],
+    "legacy_entry_ids": [],
+    "legacy_audit_count": 0,
+    "submissions": []
+  }
+}

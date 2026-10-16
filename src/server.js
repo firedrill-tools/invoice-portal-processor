@@ -216,13 +216,29 @@ if (
   process.argv[1] &&
   path.resolve(process.argv[1]) === fileURLToPath(import.meta.url)
 ) {
-  const file = path.resolve(
-    process.env.INVOICE_WORKSPACE_FILE || "workspace.json",
-  );
-  startServer(file, Number(process.env.PORT || 8787))
-    .then(() => console.log("Invoice portal listening on 127.0.0.1"))
-    .catch((error) => {
-      console.error(error.message);
-      process.exitCode = 1;
-    });
+  const args = process.argv.slice(2);
+  if (args.length === 1 && args[0] === "--help")
+    console.log(
+      "Usage: npm run portal (INVOICE_WORKSPACE_FILE, PORT; Node24+; local loopback only)",
+    );
+  else if (args.length) {
+    console.error(
+      "Portal accepts only --help; configure INVOICE_WORKSPACE_FILE and PORT",
+    );
+    process.exitCode = 2;
+  } else {
+    const file = path.resolve(
+      process.env.INVOICE_WORKSPACE_FILE || "workspace.json",
+    );
+    startServer(file, Number(process.env.PORT || 8787))
+      .then((server) =>
+        console.log(
+          `Invoice portal listening at http://127.0.0.1:${server.address().port}`,
+        ),
+      )
+      .catch((error) => {
+        console.error(error.message);
+        process.exitCode = 1;
+      });
+  }
 }

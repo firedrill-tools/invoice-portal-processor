@@ -1,0 +1,93 @@
+{
+  "dataset_id": "ledgerline-invoice-workspace",
+  "version": "1.0.0",
+  "case_id": "large-cents",
+  "profile": "boundary",
+  "state": {
+    "schema_version": 1,
+    "instance_id": "94cb39b8-32db-4b40-91cc-ebe8c81bd384",
+    "revision": 1,
+    "vendors": [
+      {
+        "id": "V-100",
+        "name": "Harbor Office Supply"
+      },
+      {
+        "id": "V-200",
+        "name": "Northline Software"
+      }
+    ],
+    "invoices": [
+      {
+        "id": "DOC-001",
+        "vendor_id": "V-100",
+        "invoice_number": "HOS-1042",
+        "issued_on": "2026-10-01",
+        "due_on": "2026-10-31",
+        "currency": "CAD",
+        "subtotal_cents": 9007199254740990,
+        "tax_cents": 0,
+        "total_cents": 9007199254740990,
+        "approval": "approved",
+        "revision": 1
+      },
+      {
+        "id": "DOC-002",
+        "vendor_id": "V-200",
+        "invoice_number": "NLS-218",
+        "issued_on": "2026-10-02",
+        "due_on": "",
+        "currency": "CAD",
+        "subtotal_cents": 8000,
+        "tax_cents": 1040,
+        "total_cents": 9040,
+        "approval": "approved",
+        "revision": 1
+      },
+      {
+        "id": "DOC-003",
+        "vendor_id": "V-100",
+        "invoice_number": "HOS-1043",
+        "issued_on": "2026-10-03",
+        "due_on": "2026-11-02",
+        "currency": "CAD",
+        "subtotal_cents": 8000,
+        "tax_cents": 1040,
+        "total_cents": 8500,
+        "approval": "approved",
+        "revision": 1
+      },
+      {
+        "id": "DOC-004",
+        "vendor_id": "V-100",
+        "invoice_number": "HOS-1042",
+        "issued_on": "2026-10-01",
+        "due_on": "2026-10-31",
+        "currency": "CAD",
+        "subtotal_cents": 12000,
+        "tax_cents": 1560,
+        "total_cents": 13560,
+        "approval": "approved",
+        "revision": 1
+      },
+      {
+        "id": "DOC-005",
+        "vendor_id": "V-200",
+        "invoice_number": "NLS-219",
+        "issued_on": "2026-10-04",
+        "due_on": "2026-11-03",
+        "currency": "CAD",
+        "subtotal_cents": 5000,
+        "tax_cents": 650,
+        "total_cents": 5650,
+        "approval": "pending",
+        "revision": 1
+      }
+    ],
+    "entries": [],
+    "audit": [],
+    "legacy_entry_ids": [],
+    "legacy_audit_count": 0,
+    "submissions": []
+  }
+}

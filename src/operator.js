@@ -467,12 +467,29 @@ if (
   process.argv[1] &&
   path.resolve(process.argv[1]) === fileURLToPath(import.meta.url)
 ) {
-  const task = process.argv.slice(2).join(" ");
-  if (!task) {
+  const args = process.argv.slice(2),
+    task = args.join(" ");
+  if (args.length === 1 && args[0] === "--help")
+    console.log(
+      "Usage: npm run operate -- <task>. Explicit ANTHROPIC_MODEL and ANTHROPIC_API_KEY required; INVOICE_PORTAL_URL and INVOICE_OUTPUT_ROOT are configurable.",
+    );
+  else if (!task || args[0]?.startsWith("--")) {
     console.error("Usage: npm run operate -- <task>");
     process.exitCode = 2;
-  } else
-    runProcessor(task)
+  } else {
+    const controller = new AbortController();
+    let interrupted = null;
+    const listeners = new Map(
+      ["SIGINT", "SIGTERM", "SIGHUP"].map((signal) => [
+        signal,
+        () => {
+          interrupted = signal;
+          controller.abort(new Error(`Received ${signal}`));
+        },
+      ]),
+    );
+    for (const [signal, handler] of listeners) process.once(signal, handler);
+    runProcessor(task, { signal: controller.signal })
       .then(({ outputDir, result }) =>
         console.log(
           JSON.stringify(
@@ -498,6 +515,18 @@ if (
             actual_effects: error.evidence?.actual_effects ?? null,
           }),
         );
-        process.exitCode = 1;
+        process.exitCode =
+          interrupted === "SIGINT"
+            ? 130
+            : interrupted === "SIGTERM"
+              ? 143
+              : interrupted === "SIGHUP"
+                ? 129
+                : 1;
+      })
+      .finally(() => {
+        for (const [signal, handler] of listeners)
+          process.removeListener(signal, handler);
       });
+  }
 }

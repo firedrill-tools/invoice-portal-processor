@@ -71,7 +71,13 @@ export class BrowserSession {
     try {
       value.guard();
       value.server = await untilAbort(
-        value.browserType.launchServer({ headless: true, timeout: 10000 }),
+        value.browserType.launchServer({
+          headless: true,
+          timeout: 10000,
+          handleSIGINT: false,
+          handleSIGTERM: false,
+          handleSIGHUP: false,
+        }),
         value.signal,
         closeLate,
       );

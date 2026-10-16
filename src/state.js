@@ -116,6 +116,11 @@ export class Store {
       (checkLock) => {
         let { value: data, hash } = load(this.file);
         if (data?.schema_version === undefined) {
+          if (this.options.requireVersioned)
+            throw new StateError(
+              "invalid_state",
+              "Private case requires its original versioned workspace",
+            );
           data = newState(data);
           validateState(data);
           this.atomic(data, hash, guard, checkLock);
