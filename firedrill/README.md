@@ -1,0 +1,40 @@
+# Firedrill agent-first integration
+
+The optional toolchain pins released `@firedrill-run/cli` and `@firedrill-run/sdk` **2.2.2** (October 19, 2026), Node 22+ for the Firedrill clients; this application requires Node 24+. The app retains its locked provider/agent SDK and Playwright dependencies.
+
+## Prepare and run
+
+From the repository root:
+
+```sh
+npm ci
+npx playwright install chromium
+npm ci --prefix firedrill --ignore-scripts --no-audit --no-fund
+npm test --prefix firedrill
+node firedrill/node_modules/@firedrill-run/cli/bin/firedrill.mjs validate firedrill/scenario.json --json --non-interactive
+```
+
+Validation is offline. In a human terminal, use the same CLI `init` to authorize/select the actual project/environment. Automation uses protected `FIREDRILL_TOKEN`, `FIREDRILL_PROJECT_ID`, `FIREDRILL_ENVIRONMENT_ID`. Model operations independently need `ANTHROPIC_API_KEY` and an enabled `ANTHROPIC_MODEL` or recipe model parameter. Do not put credentials in recipes.
+
+After scope and provider budget are authorized:
+
+```sh
+node firedrill/simulate.mjs --preview
+node firedrill/simulate.mjs
+```
+
+The bounded sequential recipe initializes a private hash-bound fictional case and starts the real Express portal on an owned ephemeral loopback port. Normal operation invokes the actual existing model/browser CLI, preserving its native SDK, completion gates, tools, request/deadline bounds, screenshot/effect receipts and cleanup. No model/client/scripted browser is injected or substituted. Busy inspection makes an actual HTTP GET to the portal and saves its HTML, with no model or Chromium claim. It returns actual before/after JSON state and confirms server closure. Existing full native/Chromium package checks remain in place.
+
+Invoice approval remains existing business source data. The adapter never fabricates approval or bypasses the portal Store.submit arithmetic/revision/duplicate/intent checks.
+
+Recipe grants are explicitly conservative; review the input permission and exact target before intentionally enabling fictional writes. No production connector or real delivery is configured. Provider final prose is not business-effect verification; inspect original state, acknowledgments and native receipts. Existing uncertainty/duplicate/revision gates remain authoritative.
+
+Every attempt saves outer run/attempt/scenario identity in private `.runs/firedrill/attempt-*/invocation.json` before app work. New invocations create new state without resetting earlier receipts; the invoice case uses a separate absent workspace leaf under that directory. Operator/CI credentials are removed before dispatch. Only reviewed case/action/task, optional model and documented independent permissions are accepted; current ID-only invocation excludes controller assessments and unsupported Tool bindings. Failed CLI stdout/stderr remains under the real driver error with nonzero exit and original run directory. Existing native abort/drain behavior is retained, and the owned portal closes in finally. Local cleanup does not guarantee remote cancellation/billing stopped or committed writes rolled back. Saved HTML/screenshots/file paths are local evidence, not uploaded Firedrill artifacts.
+
+## MCP and recovery
+
+Configure remote OAuth operator MCP at **https://mcp.firedrill.run/mcp** using [host setup](https://docs.firedrill.run/guides/coding-agents). MCP prepares, queues and inspects; the local SDK/CLI executes the command target. Host OAuth and execution login are separate. Use `--run BATCH_ID` to attach queued work, `--resume OPERATION_ID` after uncertainty, and `--result BATCH_ID` to read retained results. Preserve SDK journals and local evidence. These scripts retain public SDK diagnostics and whole-batch exit status; a new simulation starts new work.
+
+CI and the fresh locked source archive run offline integration tests with actual portal HTTP inspection and the normal native missing-key boundary. They establish wiring and cleanup, not live model quality, platform persistence, or uploaded captures. The observation recipe defines no grader/gate. Authenticated persisted happy/negative runs, paid model quality/cost, publication and licensing remain separate gates.
+
+References: [SDK](https://docs.firedrill.run/sdk/typescript), [command targets](https://docs.firedrill.run/guides/callbacks), [operator MCP](https://docs.firedrill.run/guides/control-mcp), [CI](https://docs.firedrill.run/guides/ci).

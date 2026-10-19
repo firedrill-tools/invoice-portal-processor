@@ -58,3 +58,7 @@ A failed acknowledgement may follow a committed entry. The operator retains the 
 Dependencies are pinned in `package-lock.json`. This repository is private and intentionally has no license pending the portfolio decision.
 
 Explore the [Firedrill example catalog](https://github.com/firedrill-tools/firedrill-example-catalog). Product/setup references: [Firedrill](https://firedrill.run/) and [official developer documentation](https://docs.firedrill.run/); use the documentation matching a qualified release.
+
+## Current Firedrill integration
+
+Released CLI/SDK 2.2.2, current command invocation, remote operator MCP and recovery are documented in [firedrill/README.md](firedrill/README.md). Offline checks preserve the actual portal/native key boundary and existing independent permissions. Authenticated persisted runs and live quality/cost remain separate parked gates.

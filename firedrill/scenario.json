@@ -1,0 +1,47 @@
+{
+  "schemaVersion": "2026-10-14",
+  "name": "invoice-portal-processor \u2014 actual owned portal and native browser agent",
+  "target": {
+    "kind": "command",
+    "argv": [
+      "node",
+      "firedrill/target.mjs"
+    ]
+  },
+  "scenarios": [
+    {
+      "id": "starter",
+      "name": "starter operate",
+      "input": {
+        "caseId": "starter",
+        "action": "operate",
+        "task": "Enter approved invoice DOC-001 into the portal and verify the original saved entry."
+      }
+    },
+    {
+      "id": "ambiguous-vendor",
+      "name": "ambiguous-vendor operate",
+      "input": {
+        "caseId": "ambiguous-vendor",
+        "action": "operate",
+        "task": "Enter approved invoice HOS-1042 from Harbor Office Supply."
+      }
+    },
+    {
+      "id": "busy",
+      "name": "busy inspect",
+      "input": {
+        "caseId": "busy",
+        "action": "inspect",
+        "task": "Inspect the current fictional portal without model execution or changes."
+      }
+    }
+  ],
+  "repetitions": 1,
+  "concurrency": 1,
+  "limits": {
+    "timeoutMs": 240000,
+    "maxRuns": 3,
+    "maxOutputBytes": 4194304
+  }
+}

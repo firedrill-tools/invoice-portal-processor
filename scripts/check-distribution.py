@@ -31,7 +31,7 @@ def run(command, cwd, extra=None):
 
 
 def build():
-    entries = [".env.example", ".gitattributes", ".gitignore", ".github", "AGENTS.md", "README.md", "PLAN.md", "COMPATIBILITY.md", "SOURCE.md", "DATA.md", "package.json", "package-lock.json", "src", "public", "fixtures", "data", "scenarios", "scripts", "tests"]
+    entries = ["firedrill", ".env.example", ".gitattributes", ".gitignore", ".github", "AGENTS.md", "README.md", "PLAN.md", "COMPATIBILITY.md", "SOURCE.md", "DATA.md", "package.json", "package-lock.json", "src", "public", "fixtures", "data", "scenarios", "scripts", "tests"]
     files = {}
     for entry in entries:
         target = ROOT / entry
@@ -39,7 +39,7 @@ def build():
             raise RuntimeError("Missing required source " + entry)
         for path in sorted(target.rglob("*") if target.is_dir() else [target]):
             relative = path.relative_to(ROOT)
-            if "__pycache__" in relative.parts or path.name == ".DS_Store" or path.suffix == ".pyc":
+            if any(part in {"__pycache__", "node_modules", ".runs"} for part in relative.parts) or path.name == ".DS_Store" or path.suffix == ".pyc":
                 continue
             if path.is_symlink():
                 raise RuntimeError("Unqualified source symlink: " + str(relative))
@@ -114,6 +114,9 @@ with TemporaryDirectory(prefix="firedrill-invoice-distribution-") as temporary:
     assert refused.returncode == 1 and (busy / "workspace.json").read_bytes() == before
     negative = subprocess.run([NODE, str(workspace / "src/operator.js"), "Inspect the invoice inbox."], cwd=base, env={**ENV, "ANTHROPIC_MODEL": "synthetic-account-model", "INVOICE_OUTPUT_ROOT": str(base / "preflight")}, capture_output=True, text=True, timeout=15)
     assert negative.returncode == 1 and "ANTHROPIC_API_KEY required" in negative.stderr
+    assert (workspace/'firedrill/scenario.json').exists() and not (workspace/'firedrill/node_modules').exists()
+    run([NPM, 'ci', '--prefix', 'firedrill', '--ignore-scripts', '--no-audit', '--no-fund'], workspace)
+    run([NPM, 'test', '--prefix', 'firedrill'], workspace)
     tests = run([NPM, "test"], workspace)
     match = re.search(r"(?:#|ℹ) tests (\d+)", tests)
     assert {relative: sha256((workspace / relative).read_bytes()).hexdigest() for relative in files} == files, "Qualification modified bundled source bytes"
