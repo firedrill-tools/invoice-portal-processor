@@ -1,6 +1,8 @@
-# Invoice portal processor
+# Invoice browser agent with Anthropic and Playwright
 
 A Claude tool-use agent reads synthetic invoices in a local accounts payable portal and enters approved values using **real Playwright browser actions**. The portal saves exact original entries to a versioned JSON workspace. Every model action records a page observation and real private screenshot.
+
+Simulate this Anthropic API AI agent with [Firedrill](https://firedrill.run/), a simulation platform for AI agents. Start with the [Firedrill setup and simulation guide](firedrill/README.md); your coding agent can operate it while this application's runner stays in your repository or CI.
 
 ## Run locally
 
@@ -53,7 +55,7 @@ A failed acknowledgement may follow a committed entry. The operator retains the 
 
 `npm test` qualifies **153 offline checks**, including actual Anthropic SDK/public controlled HTTP → real Chromium → portal flows, exact large-cent entry, strict source/history corruption refusal, original success/rejection recovery, uncertain commit recovery, cross-process same/competing submissions, mutex contention/replacement and process crashes before/after publication. Native completion, all-step raw usage/errors, budgets, stalled/late responses, browser startup/closure, private recording faults and partial effects remain covered. Original injected-client tests are labeled separately. Normal operator CLI tests use the actual SDK against an owned loopback HTTP provider, including ordinary busy entry, provider failure and SIGINT/SIGTERM/SIGHUP. Playwright signal handling is disabled so the CLI owner can abort, close its real process and publish final evidence; cancellation after commit preserves ENT-0080 and all twelve prior human records.
 
-[COMPATIBILITY.md](COMPATIBILITY.md) defines ownership, bounds and evidence scope. `npm run check:distribution` qualifies a complete deterministic source archive outside the checkout with a fresh locked install, all twelve private cases and the full test suite. See [DATA.md](DATA.md) and [PLAN.md](PLAN.md). No live Claude judgment, billing, Firedrill integration or financial transfer is claimed. Live model/new Firedrill/publication/license gates remain parked.
+[COMPATIBILITY.md](COMPATIBILITY.md) defines ownership, bounds and evidence scope. `npm run check:distribution` qualifies a complete deterministic source archive outside the checkout with a fresh locked install, all twelve private cases and the full test suite. See [DATA.md](DATA.md) and [PLAN.md](PLAN.md). No live Claude judgment, billing, Firedrill integration or financial transfer is claimed. Live model/Firedrill persistence/publication/license gates remain parked.
 
 Dependencies are pinned in `package-lock.json`. This repository is private and intentionally has no license pending the portfolio decision.
 
