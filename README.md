@@ -61,7 +61,7 @@ A failed acknowledgement may follow a committed entry. The operator retains the 
 
 Dependencies are pinned in `package-lock.json`. This repository is publicly viewable; no project license has been selected.
 
-Explore the [Firedrill example catalog](https://github.com/firedrill-tools/firedrill-example-catalog). Product/setup references: [Firedrill](https://firedrill.run/) and [official developer documentation](https://docs.firedrill.run/); use the documentation matching a qualified release.
+Explore the [Firedrill examples](https://docs.firedrill.run/guides/examples). Product/setup references: [Firedrill](https://firedrill.run/) and [official developer documentation](https://docs.firedrill.run/); use the documentation matching a qualified release.
 
 ## Current Firedrill integration
 
